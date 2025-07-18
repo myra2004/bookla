@@ -1,9 +1,16 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Integer, Boolean, String, Column
+from sqlalchemy import Integer, Boolean, String, Column, DateTime
 
 from datetime import datetime, UTC
 
 from app.db import Base
+
+
+class TimestampMixin:
+    created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.now(UTC))
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime, default=datetime.now(UTC), onupdate=datetime.now(UTC)
+    )
 
 
 class Book(Base):
@@ -22,4 +29,21 @@ class Book(Base):
 
     def __str__(self):
         return f'Book (name={self.name})'
+
+
+class User(Base, TimestampMixin):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    avatar: Mapped[str] = mapped_column(String(255), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    def __str__(self):
+        return self.username
+
 
